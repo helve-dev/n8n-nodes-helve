@@ -11,7 +11,10 @@
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [160, 120]
+      "position": [
+        160,
+        120
+      ]
     },
     {
       "parameters": {},
@@ -19,7 +22,10 @@
       "name": "Manual Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [200, 380]
+      "position": [
+        200,
+        380
+      ]
     },
     {
       "parameters": {
@@ -38,7 +44,10 @@
       "name": "Set Audio URL",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [420, 380]
+      "position": [
+        420,
+        380
+      ]
     },
     {
       "parameters": {
@@ -57,7 +66,10 @@
       "name": "Helve: Audio Transcribe",
       "type": "n8n-nodes-helve.helve",
       "typeVersion": 1,
-      "position": [680, 380],
+      "position": [
+        680,
+        380
+      ],
       "credentials": {
         "helveApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
@@ -76,24 +88,67 @@
       "name": "Helve: Summarize Transcript",
       "type": "n8n-nodes-helve.helve",
       "typeVersion": 1,
-      "position": [960, 380],
+      "position": [
+        960,
+        380
+      ],
       "credentials": {
         "helveApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
           "name": "Helve API"
         }
       }
+    },
+    {
+      "parameters": {
+        "content": "## Pipeline Stages\n1. **Set Audio URL**: Paste any public MP3/WAV/M4A link in **Set Audio URL**.\n2. **Transcribe & Summarize**: **Helve: Audio Transcribe** runs speaker-diarized transcription (polling `/v1/jobs/{id}` automatically) and **Helve: Summarize Transcript** produces executive summary + action items via `openrouter.chat`.\n\n*Requires self-hosted n8n with `n8n-nodes-helve@0.1.0`.*",
+        "height": 220,
+        "width": 520,
+        "color": 5
+      },
+      "id": "sticky-stages-2",
+      "name": "Sticky Note — Pipeline Stages",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        440,
+        420
+      ]
     }
   ],
   "connections": {
     "Manual Trigger": {
-      "main": [[{ "node": "Set Audio URL", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Set Audio URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Set Audio URL": {
-      "main": [[{ "node": "Helve: Audio Transcribe", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Helve: Audio Transcribe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Helve: Audio Transcribe": {
-      "main": [[{ "node": "Helve: Summarize Transcript", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Helve: Summarize Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {

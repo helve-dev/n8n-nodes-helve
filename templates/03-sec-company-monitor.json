@@ -11,26 +11,47 @@
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [160, 100]
+      "position": [
+        160,
+        100
+      ]
     },
     {
       "parameters": {
         "rule": {
-          "interval": [{ "field": "days", "daysInterval": 1 }]
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1
+            }
+          ]
         }
       },
       "id": "schedule-3",
       "name": "Daily Schedule",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [200, 380]
+      "position": [
+        200,
+        380
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "company", "name": "company", "value": "NVIDIA", "type": "string" },
-            { "id": "ticker", "name": "ticker", "value": "NVDA", "type": "string" }
+            {
+              "id": "company",
+              "name": "company",
+              "value": "NVIDIA",
+              "type": "string"
+            },
+            {
+              "id": "ticker",
+              "name": "ticker",
+              "value": "NVDA",
+              "type": "string"
+            }
           ]
         }
       },
@@ -38,7 +59,10 @@
       "name": "Set Target Company",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [420, 380]
+      "position": [
+        420,
+        380
+      ]
     },
     {
       "parameters": {
@@ -51,7 +75,10 @@
       "name": "Helve: SEC EDGAR Filings",
       "type": "n8n-nodes-helve.helve",
       "typeVersion": 1,
-      "position": [680, 300],
+      "position": [
+        680,
+        300
+      ],
       "credentials": {
         "helveApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
@@ -71,24 +98,61 @@
       "name": "Helve: Web News Search",
       "type": "n8n-nodes-helve.helve",
       "typeVersion": 1,
-      "position": [680, 480],
+      "position": [
+        680,
+        480
+      ],
       "credentials": {
         "helveApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
           "name": "Helve API"
         }
       }
+    },
+    {
+      "parameters": {
+        "content": "## Pipeline Stages\n1. **Schedule & Target**: **Daily Schedule** triggers every 24h; edit `company` and `cik` in **Set Target Company**.\n2. **Filings + News**: **Helve: SEC EDGAR Filings** fetches recent 10-K/10-Q/8-K filings (`$0.00`) and **Helve: Web News Search** checks recent press coverage under a `$0.02` cap.\n\n*Requires self-hosted n8n with `n8n-nodes-helve@0.1.0`.*",
+        "height": 220,
+        "width": 520,
+        "color": 5
+      },
+      "id": "sticky-stages-3",
+      "name": "Sticky Note — Pipeline Stages",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        440,
+        420
+      ]
     }
   ],
   "connections": {
     "Daily Schedule": {
-      "main": [[{ "node": "Set Target Company", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Set Target Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Set Target Company": {
-      "main": [[
-        { "node": "Helve: SEC EDGAR Filings", "type": "main", "index": 0 },
-        { "node": "Helve: Web News Search", "type": "main", "index": 0 }
-      ]]
+      "main": [
+        [
+          {
+            "node": "Helve: SEC EDGAR Filings",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Helve: Web News Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {

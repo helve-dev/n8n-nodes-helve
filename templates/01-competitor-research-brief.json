@@ -11,7 +11,10 @@
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [160, 120]
+      "position": [
+        160,
+        120
+      ]
     },
     {
       "parameters": {},
@@ -19,7 +22,10 @@
       "name": "Manual Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [200, 380]
+      "position": [
+        200,
+        380
+      ]
     },
     {
       "parameters": {
@@ -38,7 +44,10 @@
       "name": "Set Topic",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [420, 380]
+      "position": [
+        420,
+        380
+      ]
     },
     {
       "parameters": {
@@ -52,7 +61,10 @@
       "name": "Helve: Web Search (Fusion)",
       "type": "n8n-nodes-helve.helve",
       "typeVersion": 1,
-      "position": [660, 380],
+      "position": [
+        660,
+        380
+      ],
       "credentials": {
         "helveApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
@@ -68,7 +80,10 @@
       "name": "Pick Top 3 URLs",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [900, 380]
+      "position": [
+        900,
+        380
+      ]
     },
     {
       "parameters": {
@@ -86,27 +101,78 @@
       "name": "Helve: Extract Pages",
       "type": "n8n-nodes-helve.helve",
       "typeVersion": 1,
-      "position": [1140, 380],
+      "position": [
+        1140,
+        380
+      ],
       "credentials": {
         "helveApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
           "name": "Helve API"
         }
       }
+    },
+    {
+      "parameters": {
+        "content": "## Pipeline Stages\n1. **Configure Topic**: Edit `topic` in **Set Topic**.\n2. **Search & Extract**: **Helve: Web Search (Fusion)** queries multiple engines under a `$0.05` cap, **Pick Top 3 URLs** selects top links, and **Helve: Extract Pages** returns clean Markdown + summaries under a `$0.10` cap.\n\n*Requires self-hosted n8n with `n8n-nodes-helve@0.1.0`.*",
+        "height": 220,
+        "width": 520,
+        "color": 5
+      },
+      "id": "sticky-stages-1",
+      "name": "Sticky Note — Pipeline Stages",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        440,
+        420
+      ]
     }
   ],
   "connections": {
     "Manual Trigger": {
-      "main": [[{ "node": "Set Topic", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Set Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Set Topic": {
-      "main": [[{ "node": "Helve: Web Search (Fusion)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Helve: Web Search (Fusion)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Helve: Web Search (Fusion)": {
-      "main": [[{ "node": "Pick Top 3 URLs", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Pick Top 3 URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Pick Top 3 URLs": {
-      "main": [[{ "node": "Helve: Extract Pages", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Helve: Extract Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
