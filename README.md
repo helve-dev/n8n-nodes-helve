@@ -6,7 +6,7 @@
 
 Community node for [n8n](https://n8n.io) that connects your self-hosted workflows and AI Agents to **330+ third-party APIs** (web search, page extraction, audio transcription, SEC EDGAR filings, GitHub, LLMs, and more) through **one `HELVE_API_KEY`** at **0% per-call markup**.
 
-- **$1.00 free starter credit** at [helve.dev/signup](https://helve.dev/signup) (`≈ 1,000 Serper searches` or `1,000 Exa scrapes` at 0% markup; non-expiring top-up packs from $5).
+- **$1.00 free starter credit + 1:1 first top-up credit match (up to +$10 bonus)** at [helve.dev/signup](https://helve.dev/signup) (`≈ 1,000 Serper searches` or `1,000 Exa scrapes` at 0% markup; non-expiring top-up packs from $5 — add $5 to get $10, or add $10 to get $20).
 - **Deterministic budget caps (`spend_limit_usd`):** server-side per-key caps (HTTP 402 before overspend) plus optional per-execution caps directly inside the n8n node.
 - **$0.00 failed-call escrow:** upstream timeouts or errors never debit your balance.
 - **AI Agent Tool ready (`usableAsTool: true`):** drop the Helve node directly into n8n's AI Agent node as a tool, or run it in standard workflows.
