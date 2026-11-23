@@ -66,6 +66,7 @@
     },
     {
       "parameters": {
+        "resource": "tool",
         "operation": "callTool",
         "toolId": "sec_edgar.search_filings",
         "argumentsJson": "={{ JSON.stringify({ q: $json.company, forms: '10-K,10-Q,8-K' }) }}",
@@ -88,6 +89,7 @@
     },
     {
       "parameters": {
+        "resource": "web",
         "operation": "webSearch",
         "query": "={{ $json.company + ' ' + $json.ticker + ' earnings OR announcement' }}",
         "searchProvider": "brave",

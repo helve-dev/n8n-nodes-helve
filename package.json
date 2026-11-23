@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-helve",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "n8n community node for Helve — 330+ pay-per-call APIs (web search, page extract, audio transcription, SEC filings, LLMs) behind 1 HELVE_API_KEY at 0% markup with spend_limit_usd caps.",
   "keywords": [
     "n8n-community-node-package",

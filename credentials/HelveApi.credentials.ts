@@ -2,12 +2,14 @@ import type {
 	IAuthenticateGeneric,
 	ICredentialTestRequest,
 	ICredentialType,
+	Icon,
 	INodeProperties,
 } from 'n8n-workflow';
 
 export class HelveApi implements ICredentialType {
 	name = 'helveApi';
 	displayName = 'Helve API';
+	icon: Icon = { light: 'file:helve.svg', dark: 'file:helve.dark.svg' };
 	documentationUrl = 'https://docs.helve.dev';
 	properties: INodeProperties[] = [
 		{
@@ -19,7 +21,7 @@ export class HelveApi implements ICredentialType {
 			required: true,
 			placeholder: 'sk_live_...',
 			description:
-				'Your Helve API key (get $1.00 free starter credit at https://helve.dev/signup — 0% per-call markup, spend_limit_usd caps, $0 failed-call escrow).',
+				'Your Helve API key (get $1.00 free starter credit at https://helve.dev/signup — 0% per-call markup, spend_limit_usd caps, $0 failed-call escrow)',
 		},
 		{
 			displayName: 'Base URL',
@@ -27,7 +29,7 @@ export class HelveApi implements ICredentialType {
 			type: 'string',
 			default: 'https://helve.dev',
 			required: true,
-			description: 'Base URL of the Helve API gateway.',
+			description: 'Base URL of the Helve API gateway',
 		},
 	];
 

@@ -6,7 +6,7 @@ import type {
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
-import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError, sleep } from 'n8n-workflow';
 
 function parseDomainList(raw: string): string[] {
 	return raw
@@ -60,12 +60,12 @@ export class Helve implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Helve',
 		name: 'helve',
-		icon: 'file:helve.svg',
+		icon: { light: 'file:helve.svg', dark: 'file:helve.dark.svg' },
 		group: ['transform'],
 		version: 1,
-		subtitle: '={{$parameter["operation"]}}',
+		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description:
-			'Access 330+ pay-per-call APIs (web search, page extract, audio transcription, SEC filings, LLMs) through one HELVE_API_KEY at 0% markup with spend_limit_usd caps.',
+			'Access 330+ pay-per-call APIs (web search, page extract, audio transcription, SEC filings, LLMs) through one HELVE_API_KEY at 0% markup with spend_limit_usd caps',
 		defaults: {
 			name: 'Helve',
 		},
@@ -80,18 +80,39 @@ export class Helve implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Operation',
-				name: 'operation',
+				displayName: 'Resource',
+				name: 'resource',
 				type: 'options',
 				noDataExpression: true,
 				options: [
 					{
-						name: 'Web Search',
-						value: 'webSearch',
-						description:
-							'Search the live web across 11 engines (Exa, Tavily, Brave, Serper, Firecrawl, Perplexity, etc.) or run multi-engine fusion',
-						action: 'Search the web',
+						name: 'Audio',
+						value: 'audio',
 					},
+					{
+						name: 'Tool',
+						value: 'tool',
+					},
+					{
+						name: 'Web',
+						value: 'web',
+					},
+				],
+				default: 'web',
+			},
+
+			// --- Web Operations ---
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['web'],
+					},
+				},
+				options: [
 					{
 						name: 'Page Extract',
 						value: 'webExtract',
@@ -99,6 +120,29 @@ export class Helve implements INodeType {
 							'Fetch and extract clean Markdown, summaries, or query-focused excerpts from up to 20 URLs',
 						action: 'Extract web pages',
 					},
+					{
+						name: 'Web Search',
+						value: 'webSearch',
+						description:
+							'Search the live web across 11 engines (Exa, Tavily, Brave, Serper, Firecrawl, Perplexity, etc.) or run multi-engine fusion',
+						action: 'Search the web',
+					},
+				],
+				default: 'webSearch',
+			},
+
+			// --- Audio Operations ---
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['audio'],
+					},
+				},
+				options: [
 					{
 						name: 'Audio Transcribe',
 						value: 'audioTranscribe',
@@ -112,22 +156,38 @@ export class Helve implements INodeType {
 						description: 'Poll an async Helve job (such as audio transcription) by job ID',
 						action: 'Get job status',
 					},
+				],
+				default: 'audioTranscribe',
+			},
+
+			// --- Tool Operations ---
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['tool'],
+					},
+				},
+				options: [
 					{
-						name: 'Call Any Tool (330+ APIs)',
+						name: 'Call Any Tool',
 						value: 'callTool',
 						description:
 							'Invoke any tool_id in the Helve catalog (e.g. exa.answer, sec_edgar.search_filings, openrouter.chat)',
-						action: 'Call any Helve tool',
+						action: 'Call any tool',
 					},
 					{
-						name: 'Search Catalog (Free)',
+						name: 'Search Catalog',
 						value: 'searchTools',
 						description:
 							'Search 330+ available APIs by intent or category to inspect tool_id, input schema, and upfront pricing',
-						action: 'Search Helve catalog',
+						action: 'Search catalog',
 					},
 				],
-				default: 'webSearch',
+				default: 'callTool',
 			},
 
 			// --- Web Search ---
@@ -140,10 +200,11 @@ export class Helve implements INodeType {
 				placeholder: 'e.g. n8n self-hosted deployment best practices 2026',
 				displayOptions: {
 					show: {
+						resource: ['web'],
 						operation: ['webSearch'],
 					},
 				},
-				description: 'Natural-language or keyword search query.',
+				description: 'Natural-language or keyword search query',
 			},
 			{
 				displayName: 'Provider',
@@ -152,15 +213,16 @@ export class Helve implements INodeType {
 				default: 'auto',
 				displayOptions: {
 					show: {
+						resource: ['web'],
 						operation: ['webSearch'],
 					},
 				},
 				options: [
 					{ name: 'Auto (Best Available)', value: 'auto' },
-					{ name: 'Fusion (Multi-Engine Consensus)', value: 'fusion' },
 					{ name: 'Brave', value: 'brave' },
 					{ name: 'Exa', value: 'exa' },
 					{ name: 'Firecrawl', value: 'firecrawl' },
+					{ name: 'Fusion (Multi-Engine Consensus)', value: 'fusion' },
 					{ name: 'Jina', value: 'jina' },
 					{ name: 'Linkup', value: 'linkup' },
 					{ name: 'Octen', value: 'octen' },
@@ -170,7 +232,7 @@ export class Helve implements INodeType {
 					{ name: 'Tavily', value: 'tavily' },
 					{ name: 'Valyu', value: 'valyu' },
 				],
-				description: 'Search engine to serve the query.',
+				description: 'Search engine to serve the query',
 			},
 			{
 				displayName: 'Max Results',
@@ -180,10 +242,11 @@ export class Helve implements INodeType {
 				default: 10,
 				displayOptions: {
 					show: {
+						resource: ['web'],
 						operation: ['webSearch'],
 					},
 				},
-				description: 'Number of results to return (1–100).',
+				description: 'Number of results to return (1–100)',
 			},
 			{
 				displayName: 'Additional Options',
@@ -193,22 +256,18 @@ export class Helve implements INodeType {
 				default: {},
 				displayOptions: {
 					show: {
+						resource: ['web'],
 						operation: ['webSearch'],
 					},
 				},
 				options: [
 					{
-						displayName: 'Mode',
-						name: 'mode',
-						type: 'options',
+						displayName: 'Exclude Domains',
+						name: 'excludeDomains',
+						type: 'string',
 						default: '',
-						options: [
-							{ name: 'Provider Default', value: '' },
-							{ name: 'Instant', value: 'instant' },
-							{ name: 'Fast', value: 'fast' },
-							{ name: 'Balanced', value: 'balanced' },
-							{ name: 'Deep', value: 'deep' },
-						],
+						placeholder: 'pinterest.com',
+						description: 'Comma- or newline-separated domains to exclude',
 					},
 					{
 						displayName: 'Include Domains',
@@ -216,15 +275,20 @@ export class Helve implements INodeType {
 						type: 'string',
 						default: '',
 						placeholder: 'docs.n8n.io, github.com',
-						description: 'Comma- or newline-separated domains to restrict results to.',
+						description: 'Comma- or newline-separated domains to restrict results to',
 					},
 					{
-						displayName: 'Exclude Domains',
-						name: 'excludeDomains',
-						type: 'string',
+						displayName: 'Mode',
+						name: 'mode',
+						type: 'options',
 						default: '',
-						placeholder: 'pinterest.com',
-						description: 'Comma- or newline-separated domains to exclude.',
+						options: [
+							{ name: 'Balanced', value: 'balanced' },
+							{ name: 'Deep', value: 'deep' },
+							{ name: 'Fast', value: 'fast' },
+							{ name: 'Instant', value: 'instant' },
+							{ name: 'Provider Default', value: '' },
+						],
 					},
 					{
 						displayName: 'Published After (YYYY-MM-DD)',
@@ -247,10 +311,11 @@ export class Helve implements INodeType {
 				placeholder: 'https://example.com/article\nhttps://docs.n8n.io',
 				displayOptions: {
 					show: {
+						resource: ['web'],
 						operation: ['webExtract'],
 					},
 				},
-				description: 'One to 20 URLs to extract (comma- or newline-separated).',
+				description: 'One to 20 URLs to extract (comma- or newline-separated)',
 			},
 			{
 				displayName: 'Provider',
@@ -259,6 +324,7 @@ export class Helve implements INodeType {
 				default: 'auto',
 				displayOptions: {
 					show: {
+						resource: ['web'],
 						operation: ['webExtract'],
 					},
 				},
@@ -283,6 +349,7 @@ export class Helve implements INodeType {
 				default: {},
 				displayOptions: {
 					show: {
+						resource: ['web'],
 						operation: ['webExtract'],
 					},
 				},
@@ -292,7 +359,7 @@ export class Helve implements INodeType {
 						name: 'query',
 						type: 'string',
 						default: '',
-						description: 'Optional topic to guide summaries and excerpts.',
+						description: 'Optional topic to guide summaries and excerpts',
 					},
 					{
 						displayName: 'Format',
@@ -330,10 +397,11 @@ export class Helve implements INodeType {
 				placeholder: 'https://example.com/podcast-episode.mp3',
 				displayOptions: {
 					show: {
+						resource: ['audio'],
 						operation: ['audioTranscribe'],
 					},
 				},
-				description: 'Publicly reachable HTTPS URL of the recording.',
+				description: 'Publicly reachable HTTPS URL of the recording',
 			},
 			{
 				displayName: 'Provider',
@@ -342,12 +410,13 @@ export class Helve implements INodeType {
 				default: 'auto',
 				displayOptions: {
 					show: {
+						resource: ['audio'],
 						operation: ['audioTranscribe'],
 					},
 				},
 				options: [
-					{ name: 'Auto (Best Available)', value: 'auto' },
 					{ name: 'AssemblyAI', value: 'assemblyai' },
+					{ name: 'Auto (Best Available)', value: 'auto' },
 					{ name: 'Deepgram', value: 'deepgram' },
 					{ name: 'ElevenLabs Scribe', value: 'elevenlabs' },
 				],
@@ -360,6 +429,7 @@ export class Helve implements INodeType {
 				default: {},
 				displayOptions: {
 					show: {
+						resource: ['audio'],
 						operation: ['audioTranscribe'],
 					},
 				},
@@ -372,11 +442,18 @@ export class Helve implements INodeType {
 						placeholder: 'en',
 					},
 					{
+						displayName: 'Poll Timeout (Seconds)',
+						name: 'pollTimeoutSeconds',
+						type: 'number',
+						typeOptions: { minValue: 10, maxValue: 600 },
+						default: 180,
+					},
+					{
 						displayName: 'Speaker Diarization',
 						name: 'diarize',
 						type: 'boolean',
 						default: false,
-						description: 'Whether to label speakers as speaker_0, speaker_1, etc.',
+						description: 'Whether to label speakers as speaker_0, speaker_1, etc',
 					},
 					{
 						displayName: 'Timestamps',
@@ -384,8 +461,8 @@ export class Helve implements INodeType {
 						type: 'options',
 						default: 'word',
 						options: [
-							{ name: 'Word-Level', value: 'word' },
 							{ name: 'None', value: 'none' },
+							{ name: 'Word-Level', value: 'word' },
 						],
 					},
 					{
@@ -394,14 +471,7 @@ export class Helve implements INodeType {
 						type: 'boolean',
 						default: false,
 						description:
-							'Whether to poll GET /v1/jobs/{id} until the transcription completes or fails.',
-					},
-					{
-						displayName: 'Poll Timeout (Seconds)',
-						name: 'pollTimeoutSeconds',
-						type: 'number',
-						typeOptions: { minValue: 10, maxValue: 600 },
-						default: 180,
+							'Whether to poll GET /v1/jobs/{ID} until the transcription completes or fails',
 					},
 				],
 			},
@@ -416,10 +486,11 @@ export class Helve implements INodeType {
 				placeholder: 'job_...',
 				displayOptions: {
 					show: {
+						resource: ['audio'],
 						operation: ['getJob'],
 					},
 				},
-				description: 'Async job ID returned by Audio Transcribe or another async Helve tool.',
+				description: 'Async job ID returned by Audio Transcribe or another async Helve tool',
 			},
 
 			// --- Call Any Tool ---
@@ -432,10 +503,11 @@ export class Helve implements INodeType {
 				placeholder: 'e.g. exa.answer, sec_edgar.search_filings, openrouter.chat',
 				displayOptions: {
 					show: {
+						resource: ['tool'],
 						operation: ['callTool'],
 					},
 				},
-				description: 'Exact Helve catalog tool_id (use Search Catalog to discover 330+ tools).',
+				description: 'Exact Helve catalog tool_id (use Search Catalog to discover 330+ tools)',
 			},
 			{
 				displayName: 'Arguments (JSON)',
@@ -444,10 +516,11 @@ export class Helve implements INodeType {
 				default: '{}',
 				displayOptions: {
 					show: {
+						resource: ['tool'],
 						operation: ['callTool'],
 					},
 				},
-				description: 'JSON object matching the tool input_schema.',
+				description: 'JSON object matching the tool input_schema',
 			},
 
 			// --- Search Catalog ---
@@ -460,6 +533,7 @@ export class Helve implements INodeType {
 				placeholder: 'e.g. sec 10-k filings, web search, audio transcription',
 				displayOptions: {
 					show: {
+						resource: ['tool'],
 						operation: ['searchTools'],
 					},
 				},
@@ -472,6 +546,7 @@ export class Helve implements INodeType {
 				placeholder: 'Optional category filter (e.g. search, finance, audio)',
 				displayOptions: {
 					show: {
+						resource: ['tool'],
 						operation: ['searchTools'],
 					},
 				},
@@ -484,6 +559,7 @@ export class Helve implements INodeType {
 				default: 10,
 				displayOptions: {
 					show: {
+						resource: ['tool'],
 						operation: ['searchTools'],
 					},
 				},
@@ -512,7 +588,6 @@ export class Helve implements INodeType {
 		const returnData: INodeExecutionData[] = [];
 		const credentials = await this.getCredentials('helveApi');
 		const baseUrl = String(credentials.baseUrl || 'https://helve.dev').replace(/\/+$/, '');
-		const apiKey = String(credentials.apiKey || '').trim();
 
 		let cumulativeCostUsd = 0;
 
@@ -556,7 +631,6 @@ export class Helve implements INodeType {
 					requestOptions = {
 						method: 'POST',
 						url: `${baseUrl}/v1/tools/search`,
-						headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
 						body,
 						json: true,
 					};
@@ -565,7 +639,6 @@ export class Helve implements INodeType {
 					requestOptions = {
 						method: 'GET',
 						url: `${baseUrl}/v1/jobs/${encodeURIComponent(jobId)}`,
-						headers: { Authorization: `Bearer ${apiKey}` },
 						json: true,
 					};
 				} else {
@@ -633,7 +706,6 @@ export class Helve implements INodeType {
 					requestOptions = {
 						method: 'POST',
 						url: `${baseUrl}/v1/tools/call`,
-						headers: { Authorization: `Bearer ${apiKey}` },
 						body: {
 							tool_id: toolId,
 							arguments: args,
@@ -642,7 +714,11 @@ export class Helve implements INodeType {
 					};
 				}
 
-				let response = (await this.helpers.httpRequest(requestOptions)) as IDataObject;
+				let response = (await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'helveApi',
+					requestOptions,
+				)) as IDataObject;
 
 				// Optional polling for audioTranscribe when waitForCompletion is enabled
 				if (operation === 'audioTranscribe') {
@@ -658,18 +734,21 @@ export class Helve implements INodeType {
 						const timeoutMs = Number(opts.pollTimeoutSeconds || 180) * 1000;
 						const deadline = Date.now() + timeoutMs;
 						while (Date.now() < deadline) {
-							const jobResp = (await this.helpers.httpRequest({
-								method: 'GET',
-								url: `${baseUrl}/v1/jobs/${encodeURIComponent(jobId)}`,
-								headers: { Authorization: `Bearer ${apiKey}` },
-								json: true,
-							})) as IDataObject;
+							const jobResp = (await this.helpers.httpRequestWithAuthentication.call(
+								this,
+								'helveApi',
+								{
+									method: 'GET',
+									url: `${baseUrl}/v1/jobs/${encodeURIComponent(jobId)}`,
+									json: true,
+								},
+							)) as IDataObject;
 							const status = String(jobResp.status || '').toLowerCase();
 							if (status === 'completed' || status === 'failed' || status === 'cancelled') {
 								response = jobResp;
 								break;
 							}
-							await new Promise((r) => setTimeout(r, 3000));
+							await sleep(3000);
 						}
 					}
 				}

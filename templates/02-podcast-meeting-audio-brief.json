@@ -51,6 +51,7 @@
     },
     {
       "parameters": {
+        "resource": "audio",
         "operation": "audioTranscribe",
         "audioUrl": "={{ $json.audio_url }}",
         "audioProvider": "auto",
@@ -79,6 +80,7 @@
     },
     {
       "parameters": {
+        "resource": "tool",
         "operation": "callTool",
         "toolId": "openrouter.chat",
         "argumentsJson": "={{ JSON.stringify({ model: 'openai/gpt-4o-mini', messages: [{ role: 'user', content: 'Summarize key decisions and action items from this transcript:\\n\\n' + ($json.result?.text || $json.text || JSON.stringify($json)).slice(0, 12000) }] }) }}",

@@ -51,6 +51,7 @@
     },
     {
       "parameters": {
+        "resource": "web",
         "operation": "webSearch",
         "query": "={{ $json.topic }}",
         "searchProvider": "fusion",
@@ -87,6 +88,7 @@
     },
     {
       "parameters": {
+        "resource": "web",
         "operation": "webExtract",
         "urls": "={{ $json.urls }}",
         "extractProvider": "auto",
