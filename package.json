@@ -1,0 +1,60 @@
+{
+  "name": "n8n-nodes-helve",
+  "version": "0.1.0",
+  "description": "n8n community node for Helve — 330+ pay-per-call APIs (web search, page extract, audio transcription, SEC filings, LLMs) behind 1 HELVE_API_KEY at 0% markup with spend_limit_usd caps.",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "n8n-nodes",
+    "helve",
+    "ai-agents",
+    "web-search",
+    "web-extract",
+    "audio-transcription",
+    "api-gateway"
+  ],
+  "license": "MIT",
+  "homepage": "https://helve.dev",
+  "author": {
+    "name": "Helve",
+    "email": "daniel.foster@helve.dev",
+    "url": "https://helve.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/helve-dev/n8n-nodes-helve.git"
+  },
+  "bugs": {
+    "url": "https://github.com/helve-dev/n8n-nodes-helve/issues"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && node scripts/copy-assets.mjs",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/HelveApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Helve/Helve.node.js"
+    ]
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "n8n-workflow": "^1.80.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "name": "Helve — Audio & Podcast Transcription Brief (Self-Hosted)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Audio & Podcast Transcription Brief\nTranscribes an audio/video URL with speaker diarization (`helve.audio_transcribe`) and summarizes the transcript via `openrouter.chat` through 1 `HELVE_API_KEY` at 0% markup.\n\nNo separate AssemblyAI, Deepgram, or OpenRouter accounts required.",
+        "height": 200,
+        "width": 420
+      },
+      "id": "sticky-2",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [160, 120]
+    },
+    {
+      "parameters": {},
+      "id": "trigger-2",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 380]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "audio_url",
+              "name": "audio_url",
+              "value": "https://example.com/sample-recording.mp3",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "set-audio-2",
+      "name": "Set Audio URL",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [420, 380]
+    },
+    {
+      "parameters": {
+        "operation": "audioTranscribe",
+        "audioUrl": "={{ $json.audio_url }}",
+        "audioProvider": "auto",
+        "audioOptions": {
+          "diarize": true,
+          "timestamps": "word",
+          "waitForCompletion": true,
+          "pollTimeoutSeconds": 300
+        },
+        "spendLimitUsd": 0.5
+      },
+      "id": "helve-audio-2",
+      "name": "Helve: Audio Transcribe",
+      "type": "n8n-nodes-helve.helve",
+      "typeVersion": 1,
+      "position": [680, 380],
+      "credentials": {
+        "helveApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Helve API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "callTool",
+        "toolId": "openrouter.chat",
+        "argumentsJson": "={{ JSON.stringify({ model: 'openai/gpt-4o-mini', messages: [{ role: 'user', content: 'Summarize key decisions and action items from this transcript:\\n\\n' + ($json.result?.text || $json.text || JSON.stringify($json)).slice(0, 12000) }] }) }}",
+        "spendLimitUsd": 0.1
+      },
+      "id": "helve-summary-2",
+      "name": "Helve: Summarize Transcript",
+      "type": "n8n-nodes-helve.helve",
+      "typeVersion": 1,
+      "position": [960, 380],
+      "credentials": {
+        "helveApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Helve API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "Set Audio URL", "type": "main", "index": 0 }]]
+    },
+    "Set Audio URL": {
+      "main": [[{ "node": "Helve: Audio Transcribe", "type": "main", "index": 0 }]]
+    },
+    "Helve: Audio Transcribe": {
+      "main": [[{ "node": "Helve: Summarize Transcript", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

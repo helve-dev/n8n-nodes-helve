@@ -1,0 +1,97 @@
+{
+  "name": "Helve — Scheduled SEC Filing & Company News Monitor (Self-Hosted)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Scheduled SEC Filing & Company News Monitor\nRuns daily on a Schedule Trigger: checks recent SEC EDGAR filings (`sec_edgar.search_filings`, $0.00) alongside live web news (`helve.web_search`) through 1 `HELVE_API_KEY` with a hard `spendLimitUsd` cap.",
+        "height": 200,
+        "width": 440
+      },
+      "id": "sticky-3",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [160, 100]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "days", "daysInterval": 1 }]
+        }
+      },
+      "id": "schedule-3",
+      "name": "Daily Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 380]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "company", "name": "company", "value": "NVIDIA", "type": "string" },
+            { "id": "ticker", "name": "ticker", "value": "NVDA", "type": "string" }
+          ]
+        }
+      },
+      "id": "set-company-3",
+      "name": "Set Target Company",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [420, 380]
+    },
+    {
+      "parameters": {
+        "operation": "callTool",
+        "toolId": "sec_edgar.search_filings",
+        "argumentsJson": "={{ JSON.stringify({ q: $json.company, forms: '10-K,10-Q,8-K' }) }}",
+        "spendLimitUsd": 0.05
+      },
+      "id": "helve-sec-3",
+      "name": "Helve: SEC EDGAR Filings",
+      "type": "n8n-nodes-helve.helve",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": {
+        "helveApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Helve API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "webSearch",
+        "query": "={{ $json.company + ' ' + $json.ticker + ' earnings OR announcement' }}",
+        "searchProvider": "brave",
+        "maxResults": 5,
+        "spendLimitUsd": 0.05
+      },
+      "id": "helve-news-3",
+      "name": "Helve: Web News Search",
+      "type": "n8n-nodes-helve.helve",
+      "typeVersion": 1,
+      "position": [680, 480],
+      "credentials": {
+        "helveApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Helve API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily Schedule": {
+      "main": [[{ "node": "Set Target Company", "type": "main", "index": 0 }]]
+    },
+    "Set Target Company": {
+      "main": [[
+        { "node": "Helve: SEC EDGAR Filings", "type": "main", "index": 0 },
+        { "node": "Helve: Web News Search", "type": "main", "index": 0 }
+      ]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

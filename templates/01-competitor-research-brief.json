@@ -1,0 +1,115 @@
+{
+  "name": "Helve — Multi-Engine Competitor Research Brief (Self-Hosted)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Multi-Engine Competitor Research Brief\nRuns multi-engine web search (`helve.web_search` fusion) + clean Markdown page extraction (`helve.web_extract`) through 1 `HELVE_API_KEY` at 0% markup (~$0.02/run).\n\n1. Install `n8n-nodes-helve` under Settings -> Community Nodes.\n2. Add a Helve API credential (`sk_live_...` — $1 free credit at helve.dev/signup).\n3. Edit the topic in **Set Topic** and click **Test workflow**.",
+        "height": 220,
+        "width": 420
+      },
+      "id": "sticky-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [160, 120]
+    },
+    {
+      "parameters": {},
+      "id": "trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 380]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "topic",
+              "name": "topic",
+              "value": "self-hosted workflow automation pricing 2026",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "set-topic-1",
+      "name": "Set Topic",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [420, 380]
+    },
+    {
+      "parameters": {
+        "operation": "webSearch",
+        "query": "={{ $json.topic }}",
+        "searchProvider": "fusion",
+        "maxResults": 5,
+        "spendLimitUsd": 0.1
+      },
+      "id": "helve-search-1",
+      "name": "Helve: Web Search (Fusion)",
+      "type": "n8n-nodes-helve.helve",
+      "typeVersion": 1,
+      "position": [660, 380],
+      "credentials": {
+        "helveApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Helve API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const res = $input.first().json;\nconst results = res.results || res.data?.results || res.result?.results || [];\nconst urls = results.slice(0, 3).map(r => r.url).filter(Boolean);\nreturn [{ json: { urls: urls.join('\\n'), search_cost_usd: res._helve_execution?.cost_usd || 0, result_count: results.length } }];"
+      },
+      "id": "code-urls-1",
+      "name": "Pick Top 3 URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 380]
+    },
+    {
+      "parameters": {
+        "operation": "webExtract",
+        "urls": "={{ $json.urls }}",
+        "extractProvider": "auto",
+        "extractOptions": {
+          "format": "markdown",
+          "summary": true,
+          "maxChars": 8000
+        },
+        "spendLimitUsd": 0.15
+      },
+      "id": "helve-extract-1",
+      "name": "Helve: Extract Pages",
+      "type": "n8n-nodes-helve.helve",
+      "typeVersion": 1,
+      "position": [1140, 380],
+      "credentials": {
+        "helveApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Helve API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "Set Topic", "type": "main", "index": 0 }]]
+    },
+    "Set Topic": {
+      "main": [[{ "node": "Helve: Web Search (Fusion)", "type": "main", "index": 0 }]]
+    },
+    "Helve: Web Search (Fusion)": {
+      "main": [[{ "node": "Pick Top 3 URLs", "type": "main", "index": 0 }]]
+    },
+    "Pick Top 3 URLs": {
+      "main": [[{ "node": "Helve: Extract Pages", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
